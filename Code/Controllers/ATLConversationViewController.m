@@ -412,6 +412,9 @@ static NSInteger const ATLPhotoActionSheet = 1000;
     if ([self shouldDisplayReadReceiptForSection:section]) {
         readReceipt = [self attributedStringForRecipientStatusOfMessage:[self.conversationDataSource messageAtCollectionViewSection:section]];
     }
+    if ([self shouldDisplaySentDateForSection:section]) {
+        readReceipt = [self attributedStringForMessageDate:[self.conversationDataSource messageAtCollectionViewSection:section]];
+    }
     BOOL shouldClusterMessage = [self shouldClusterMessageAtSection:section];
     CGFloat height = [ATLConversationCollectionViewFooter footerHeightWithRecipientStatus:readReceipt clustered:shouldClusterMessage];
     return CGSizeMake(0, height);
@@ -469,7 +472,14 @@ static NSInteger const ATLPhotoActionSheet = 1000;
 {
     LYRMessage *message = [self.conversationDataSource messageAtCollectionViewIndexPath:indexPath];
     footer.message = message;
-    if ([self shouldDisplayReadReceiptForSection:indexPath.section]) {
+    // HACLYON: Add first if case for displaying dates under messages.
+    if ([self shouldDisplaySentDateForSection:indexPath.section]) {
+        if ([message.sender.userID isEqual:self.layerClient.authenticatedUser.userID]) {
+            [footer updateWithAttributedStringForRecipientStatus:[self attributedStringForMessageDate:message] textAlignment:NSTextAlignmentRight];
+        } else {
+            [footer updateWithAttributedStringForRecipientStatus:[self attributedStringForMessageDate:message] textAlignment:NSTextAlignmentLeft];
+        }
+    } else if ([self shouldDisplayReadReceiptForSection:indexPath.section]) {
         [footer updateWithAttributedStringForRecipientStatus:[self attributedStringForRecipientStatusOfMessage:message]];
     } else {
         [footer updateWithAttributedStringForRecipientStatus:nil];
@@ -547,6 +557,15 @@ static NSInteger const ATLPhotoActionSheet = 1000;
     if (![message.sender.userID isEqualToString:self.layerClient.authenticatedUser.userID]) return NO;
     
     return YES;
+}
+
+// HACLYON: Add method to handle message tap.
+- (BOOL)shouldDisplaySentDateForSection:(NSUInteger)section
+{
+    LYRMessage *message = [self.conversationDataSource messageAtCollectionViewSection:section];
+
+    return [message isEqual:self.selectedMessage];
+
 }
 
 - (BOOL)shouldClusterMessageAtSection:(NSUInteger)section
@@ -1350,7 +1369,9 @@ static NSInteger const ATLPhotoActionSheet = 1000;
         NSIndexPath *queryControllerIndexPath = [self.conversationDataSource.queryController indexPathForObject:footer.message];
         if (queryControllerIndexPath && [footer.message.identifier isEqual:message.identifier]) {
             NSIndexPath *collectionViewIndexPath = [self.conversationDataSource collectionViewIndexPathForQueryControllerIndexPath:queryControllerIndexPath];
-            [self configureFooter:footer atIndexPath:collectionViewIndexPath];
+            // HALCYON: Reload footer when value changed.
+//            [self configureFooter:footer atIndexPath:collectionViewIndexPath];
+            [self.collectionView reloadSections:[[NSIndexSet alloc] initWithIndex:collectionViewIndexPath.section]];
             break;
         }
     }

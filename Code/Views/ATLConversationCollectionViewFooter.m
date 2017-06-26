@@ -73,6 +73,13 @@ CGFloat const ATLConversationViewFooterUnClusteredPadding = 7;
 {
     [super prepareForReuse];
     self.recipientStatusLabel.text = nil;
+    self.recipientStatusLabel.textAlignment = NSTextAlignmentRight;
+}
+
+- (void)updateWithAttributedStringForRecipientStatus:(NSAttributedString *)recipientStatus textAlignment:(NSTextAlignment)alignment
+{
+    [self updateWithAttributedStringForRecipientStatus:recipientStatus];
+    self.recipientStatusLabel.textAlignment = alignment;
 }
 
 - (void)updateWithAttributedStringForRecipientStatus:(NSAttributedString *)recipientStatus
@@ -123,7 +130,7 @@ CGFloat const ATLConversationViewFooterUnClusteredPadding = 7;
 - (void)configureRecipientStatusLabelConstraints
 {
     [self addConstraint:[NSLayoutConstraint constraintWithItem:self.recipientStatusLabel attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeTop multiplier:1.0 constant:ATLConversationViewFooterTopPadding]];
-    [self addConstraint:[NSLayoutConstraint constraintWithItem:self.recipientStatusLabel attribute:NSLayoutAttributeLeft relatedBy:NSLayoutRelationGreaterThanOrEqual toItem:self attribute:NSLayoutAttributeLeft multiplier:1.0 constant:20]];
+    [self addConstraint:[NSLayoutConstraint constraintWithItem:self.recipientStatusLabel attribute:NSLayoutAttributeLeft relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeLeft multiplier:1.0 constant:45]];
     NSLayoutConstraint *recipientStatusLabelRightConstraint = [NSLayoutConstraint constraintWithItem:self.recipientStatusLabel attribute:NSLayoutAttributeRight relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeRight multiplier:1.0 constant:-ATLMessageCellHorizontalMargin];
     // To work around an apparent system bug that initially requires the view to have zero width, instead of a required priority, we use a priority one higher than the content compression resistance.
     recipientStatusLabelRightConstraint.priority = UILayoutPriorityDefaultHigh + 1;

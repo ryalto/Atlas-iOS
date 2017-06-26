@@ -214,6 +214,12 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (nonatomic) LYRConversation *conversation;
 
+// HALCYON: Added.
+/**
+ @abstract: The LYRMessage which is selected after cell tap.
+ */
+@property (nonatomic, nullable) LYRMessage *selectedMessage;
+
 /**
  @abstract The `LYRQueryController` object managing data displayed in the controller.
  */

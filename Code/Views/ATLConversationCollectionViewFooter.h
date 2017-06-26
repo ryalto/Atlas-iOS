@@ -43,6 +43,13 @@ extern NSString *const ATLConversationViewFooterIdentifier;
 - (void)updateWithAttributedStringForRecipientStatus:(nullable NSAttributedString *)recipientStatus;
 
 /**
+ @abstract Displays a string of text representing the read status of a message.
+ @param recipientStatus The string representing the status.
+ @param alignment The text alignment for footer text.
+ */
+- (void)updateWithAttributedStringForRecipientStatus:(NSAttributedString *)recipientStatus textAlignment:(NSTextAlignment)alignment;
+
+/**
  @abstract Performs calculations to determine the footer height.
  @param recipientStatus An `NSAttributedString` containing attributes that will be used in the calculation.
  @param clustered A boolean value to determines whether the message cell corresponding to the footer should be clustered with the previous cell. Messages sent within 60 seconds of each other are clustered.
