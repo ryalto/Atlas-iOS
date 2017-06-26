@@ -268,6 +268,14 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (void)sendMessage:(LYRMessage *)message;
 
+/**
+ Determines if a message is system message or not.
+
+ @param message The message object to verify.
+ @return Boolean value
+ */
+- (BOOL)isSystemMessage:(LYRMessage *)message;
+
 ///---------------------------
 /// @name Configuring Behavior
 ///---------------------------

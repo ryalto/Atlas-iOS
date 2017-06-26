@@ -525,11 +525,12 @@ static NSInteger const ATLPhotoActionSheet = 1000;
     if (!previousMessage.sentAt) return NO;
     
     NSDate *date = message.sentAt ?: [NSDate date];
-    NSTimeInterval interval = [date timeIntervalSinceDate:previousMessage.sentAt];
-    if (fabs(interval) > self.dateDisplayTimeInterval) {
-        return YES;
-    }
-    return NO;
+    // HALCYON: Removed to improve date mechanism.
+    //    NSTimeInterval interval = [date timeIntervalSinceDate:previousMessage.sentAt];
+    //    if (fabs(interval) > self.dateDisplayTimeInterval) {
+    //        return YES;
+    //    }
+    return ![[NSCalendar currentCalendar] isDate:date inSameDayAsDate:previousMessage.sentAt];
 }
 
 - (BOOL)shouldDisplaySenderLabelForSection:(NSUInteger)section
@@ -537,12 +538,14 @@ static NSInteger const ATLPhotoActionSheet = 1000;
     if (!self.shouldDisplayUsernameForOneOtherParticipant && self.conversation.participants.count <= 2) return NO;
     
     LYRMessage *message = [self.conversationDataSource messageAtCollectionViewSection:section];
+    // HALCYON: Handle system message type.
+    if ([self isSystemMessage:message]) return NO;
     if ([message.sender.userID isEqualToString:self.layerClient.authenticatedUser.userID]) return NO;
     if (section > ATLNumberOfSectionsBeforeFirstMessageSection) {
         LYRMessage *previousMessage = [self.conversationDataSource messageAtCollectionViewSection:section - 1];
-        if ([previousMessage.sender.userID isEqualToString:message.sender.userID]) {
-            return NO;
-        }
+        // HALCYON: Handle system message type.
+        if ([self isSystemMessage:previousMessage]) return YES;
+        if ([previousMessage.sender.userID isEqualToString:message.sender.userID]) return NO;
     }
     return YES;
 }
@@ -590,7 +593,10 @@ static NSInteger const ATLPhotoActionSheet = 1000;
     if (message.sender.userID == nil) {
         return NO;
     }
-    
+
+    // HACLYON: Handle system message type.
+    if ([self isSystemMessage:message]) return NO;
+
     if ([message.sender.userID isEqualToString:self.layerClient.authenticatedUser.userID] && !self.shouldDisplayAvatarItemForAuthenticatedUser) {
         return NO;
     }
@@ -601,6 +607,9 @@ static NSInteger const ATLPhotoActionSheet = 1000;
     NSInteger lastSection = [self.conversationDataSource collectionViewSectionForQueryControllerRow:lastQueryControllerRow];
     if (indexPath.section < lastSection) {
         LYRMessage *nextMessage = [self.conversationDataSource messageAtCollectionViewSection:indexPath.section + 1];
+        // HACLYON: Handle system message type.
+        if ([self isSystemMessage:nextMessage]) return YES;
+
         // If the next message is sent by the same user, no
         if ([nextMessage.sender.userID isEqualToString:message.sender.userID] && self.avatarItemDisplayFrequency != ATLAvatarItemDisplayFrequencyAll) {
             return NO;
@@ -702,6 +711,10 @@ static NSInteger const ATLPhotoActionSheet = 1000;
     } else {
         [self notifyDelegateOfMessageSendFailure:message error:error];
     }
+}
+
+- (BOOL)isSystemMessage:(LYRMessage *)message {
+    return FALSE;
 }
 
 #pragma mark - Location Message
@@ -1369,9 +1382,9 @@ static NSInteger const ATLPhotoActionSheet = 1000;
         NSIndexPath *queryControllerIndexPath = [self.conversationDataSource.queryController indexPathForObject:footer.message];
         if (queryControllerIndexPath && [footer.message.identifier isEqual:message.identifier]) {
             NSIndexPath *collectionViewIndexPath = [self.conversationDataSource collectionViewIndexPathForQueryControllerIndexPath:queryControllerIndexPath];
-            // HALCYON: Reload footer when value changed.
-//            [self configureFooter:footer atIndexPath:collectionViewIndexPath];
+            // HACLYON: Add better reload.
             [self.collectionView reloadSections:[[NSIndexSet alloc] initWithIndex:collectionViewIndexPath.section]];
+//            [self configureFooter:footer atIndexPath:collectionViewIndexPath];
             break;
         }
     }
